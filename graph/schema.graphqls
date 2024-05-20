@@ -1,0 +1,80 @@
+
+type User {
+  UserId: UUID!
+  Posts: [Post]
+  Comments: [Comment]
+}
+
+type Post {
+  PostId: UUID!
+  Title: String!
+  Body: String!
+  UserId: UUID!
+  Comments: [Comment]
+  DisabledComments: Boolean!
+  CreatedAt: Time !
+  UpdatedAt: Time
+}
+
+type Comment {
+  CommentId: UUID!
+  Body: String!
+  UserId: UUID!
+  CreatedAt: Time !
+  UpdatedAt: Time
+  Parent: Comment
+  Children: [Comment]
+  Post: Post !
+}
+
+input NewPost {
+  Title: String!
+  Body: String!
+  UserId: UUID!
+  DisabledComments: Boolean!
+  CreatedAt: Time !
+}
+
+input UpdatePost {
+  PostId: UUID!
+  Title: String!
+  Body: String!
+  UserId: UUID!
+  DisabledComments: Boolean!
+  UpdatedAt: Time !
+}
+
+input NewComment {
+  Body: String!
+  UserId: UUID!
+  CreatedAt: Time !
+  ParentId: UUID
+  PostId: UUID !
+
+}
+
+input UpdateComment {
+  Body: String!
+  UpdatedAt: Time !
+}
+
+type Mutation {
+  createPost(input: NewPost!): Post!
+  updatePost(input: UpdatePost!): Post!
+  deletePost(PostId: UUID!): Boolean!
+  createComment(input: NewComment!): Comment!
+  updateComment(input: UpdateComment): Comment !
+  deleteComment(CommentId: UUID!): Boolean!
+}
+
+type Subscription {
+  newComment(postId: UUID!): Comment!
+}
+
+type Query {
+  Posts(limit: Int = 10, offset: Int = 0): [Post!]!
+  Post(id: ID!): Post
+}
+
+scalar UUID
+scalar Time
