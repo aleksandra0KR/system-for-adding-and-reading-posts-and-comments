@@ -2,8 +2,6 @@
 type User {
   UserId: UUID!
   Name: String!
-  Posts: [Post]
-  Comments: [Comment]
 }
 
 type Post {
@@ -11,7 +9,7 @@ type Post {
   Title: String!
   Body: String!
   UserId: UUID!
-  Comments: [Comment]
+  Comments: [Comment!]
   DisabledComments: Boolean!
 
 }
@@ -22,7 +20,7 @@ type Comment {
   UserId: UUID!
   Parent: UUID!
   Children: [Comment]
-  Post: Post !
+  Post: UUID !
 }
 
 input NewPost {
