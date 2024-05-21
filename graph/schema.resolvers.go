@@ -70,17 +70,58 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id uuid.UUID) (bool, 
 
 // CreateComment is the resolver for the createComment field.
 func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewComment) (*model.Comment, error) {
-	panic(fmt.Errorf("not implemented: CreateComment - createComment"))
+	comment := &models.Comment{
+		Body:   input.Body,
+		UserId: input.UserID,
+		Post:   input.PostID,
+	}
+	if input.ParentID == nil {
+		comment.Parent = uuid.Nil
+	} else {
+		comment.Parent = *input.ParentID
+	}
+	comment, err := r.Repository.CommentRepository.CreateComment(ctx, comment)
+	if err != nil {
+		return nil, err
+	}
+	commentResult := &model.Comment{
+		ID:     comment.Id,
+		Body:   comment.Body,
+		UserID: comment.UserId,
+		Parent: comment.Parent,
+		Post:   comment.Post,
+	}
+
+	return commentResult, err
 }
 
 // UpdateComment is the resolver for the updateComment field.
 func (r *mutationResolver) UpdateComment(ctx context.Context, input *model.UpdateComment) (*model.Comment, error) {
-	panic(fmt.Errorf("not implemented: UpdateComment - updateComment"))
+	comment := &models.Comment{
+		Id:   input.ID,
+		Body: input.Body,
+	}
+	comment, err := r.Repository.CommentRepository.UpdateComment(ctx, comment)
+	if err != nil {
+		return nil, err
+	}
+	result := &model.Comment{
+		ID:     comment.Id,
+		Body:   comment.Body,
+		UserID: comment.UserId,
+		Parent: comment.Parent,
+		Post:   comment.Post,
+	}
+	return result, err
 }
 
 // DeleteComment is the resolver for the deleteComment field.
 func (r *mutationResolver) DeleteComment(ctx context.Context, id uuid.UUID) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteComment - deleteComment"))
+	err := r.Repository.CommentRepository.DeleteCommentByID(ctx, id)
+	if err != nil {
+		return false, err
+	}
+	return true, err
 }
 
 // CreatUser is the resolver for the creatUser field.

@@ -16,8 +16,9 @@ CREATE TABLE IF NOT EXISTS "comments" (
                                           "id" uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     "body" TEXT NOT NULL,
     "user_id" uuid REFERENCES "users" ( "id") ON DELETE CASCADE NOT NULL,
-    "parent_comment_id" uuid REFERENCES "comments" ("id") ON DELETE CASCADE,
-                                          "post_id" uuid REFERENCES "posts" ("id") ON DELETE CASCADE
+    "parent" uuid REFERENCES "comments" ("id") ON DELETE CASCADE,
+                                          "children" uuid REFERENCES "comments" ("id") ON DELETE CASCADE,
+                                          "post" uuid REFERENCES "posts" ("id") ON DELETE CASCADE
                                                   );
 
 

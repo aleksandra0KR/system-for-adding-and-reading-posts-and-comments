@@ -32,10 +32,13 @@ func (r *commentPostgresRepository) DeleteCommentByID(ctx context.Context, id uu
 }
 
 func (r *commentPostgresRepository) UpdateComment(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
-	_, err := r.db.WithContext(ctx).Model(comment).Where("id = ?", comment.Id).Update()
+	_, err := r.db.WithContext(ctx).Model(comment).Where("id = ?", comment.Id).Returning("*").Update("body", comment.Body)
+	err = r.db.WithContext(ctx).Model(comment).Where("id = ?", comment.Id).Select()
+
 	if err != nil {
 		return nil, err
 	}
+
 	return comment, nil
 }
 
