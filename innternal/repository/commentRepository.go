@@ -1,14 +1,15 @@
 package repository
 
 import (
+	"context"
 	"github.com/google/uuid"
-	"system-for-adding-and-reading-posts-and-comments/innternal/model"
+	"system-for-adding-and-reading-posts-and-comments/innternal/models"
 )
 
 type CommentRepository interface {
-	CreateComment(comment *model.Comment) error
-	DeleteCommentByID(id uuid.UUID) error
-	GetCommentsForPost(id uuid.UUID) ([]*model.Comment, error)
-	UpdateComment(comment *model.Comment) error
-	GetChildrenComments(id uuid.UUID) ([]*model.Comment, error)
+	CreateComment(ctx context.Context, comment *models.Comment) (*models.Comment, error)
+	DeleteCommentByID(ctx context.Context, id uuid.UUID) error
+	GetCommentsForPost(ctx context.Context, id uuid.UUID, limit, offset int) ([]*models.Comment, error)
+	UpdateComment(ctx context.Context, comment *models.Comment) (*models.Comment, error)
+	GetChildrenComments(ctx context.Context, id uuid.UUID) ([]*models.Comment, error)
 }

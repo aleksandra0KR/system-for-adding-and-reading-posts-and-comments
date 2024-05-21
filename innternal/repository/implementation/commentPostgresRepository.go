@@ -1,91 +1,63 @@
 package implementation
 
 import (
+	"context"
+	"github.com/go-pg/pg/v10"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
-	"system-for-adding-and-reading-posts-and-comments/innternal/model"
+	"system-for-adding-and-reading-posts-and-comments/innternal/models"
 )
 
 type commentPostgresRepository struct {
-	db *sqlx.DB
+	db *pg.DB
 }
 
-func NewCommentPostgresRepository(db *sqlx.DB) *commentPostgresRepository {
+func NewCommentPostgresRepository(db *pg.DB) *commentPostgresRepository {
 	return &commentPostgresRepository{db: db}
 }
 
-func (r *commentPostgresRepository) CreateComment(comment *model.Comment) error {
-	var id uuid.UUID
-	query := `INSERT INTO "comments" ("body", "userId","parent", "postId") VALUES ($1, $2, $3, $4) RETURNING commentId`
-	row := r.db.QueryRow(query)
-	if err := row.Scan(&id); err != nil {
-		return err
-	}
-	comment.CommentId = id
-
-	return nil
-}
-
-func (r *commentPostgresRepository) DeleteCommentByID(id uuid.UUID) error {
-
-	query := `DELETE FROM "comments" where "commentId"= $1`
-
-	_, err := r.db.Exec(query, id)
+func (r *commentPostgresRepository) CreateComment(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
+	_, err := r.db.WithContext(ctx).Model(comment).Returning("*").Insert()
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	return comment, nil
 }
 
-func (r *commentPostgresRepository) UpdateComment(comment *model.Comment) error {
-	query := ` UPDATE "comments" SET "body" = $2 WHERE "commentId" = $1`
-	_, err := r.db.Exec(query, comment.CommentId, comment.Body)
+func (r *commentPostgresRepository) DeleteCommentByID(ctx context.Context, id uuid.UUID) error {
+
+	comment := &models.Comment{Id: id}
+	_, err := r.db.WithContext(ctx).Model(comment).Where("id = ?", comment.Id).Delete()
 	return err
+
 }
 
-func (r *commentPostgresRepository) GetCommentsForPost(id uuid.UUID) ([]*model.Comment, error) {
-	query := ` SELECT * FROM  "comments" WHERE "postId" = $1`
-
-	var comments []*model.Comment
-	rows, err := r.db.Query(query, id)
+func (r *commentPostgresRepository) UpdateComment(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
+	_, err := r.db.WithContext(ctx).Model(comment).Where("id = ?", comment.Id).Update()
 	if err != nil {
-		return comments, err
+		return nil, err
 	}
+	return comment, nil
+}
 
-	for rows.Next() {
-		var c model.Comment
-		err = rows.Scan(&c.CommentId, &c.Body, &c.UserId, &c.Parent, &c.Post)
+func (r *commentPostgresRepository) GetCommentsForPost(ctx context.Context, id uuid.UUID, limit, offset int) ([]*models.Comment, error) {
+	var comments []*models.Comment
 
-		if err != nil {
-			return comments, err
-		}
+	query := r.db.WithContext(ctx).Model(&comments).Order("id")
+	query.Limit(limit)
+	query.Offset(offset)
 
-		comments = append(comments, &c)
-
+	err := query.Select()
+	if err != nil {
+		return nil, err
 	}
 	return comments, nil
 }
 
-func (r *commentPostgresRepository) GetChildrenComments(id uuid.UUID) ([]*model.Comment, error) {
-	query := ` SELECT * FROM  "comments" WHERE "parent" = $1`
-
-	var comments []*model.Comment
-	rows, err := r.db.Query(query, id)
+func (r *commentPostgresRepository) GetChildrenComments(ctx context.Context, id uuid.UUID) ([]*models.Comment, error) {
+	var comments []*models.Comment
+	err := r.db.WithContext(ctx).Model(&comments).Where("parent = ?", id).Order("id").Select()
 	if err != nil {
-		return comments, err
-	}
-
-	for rows.Next() {
-		var c model.Comment
-		err = rows.Scan(&c.CommentId, &c.Body, &c.UserId, &c.Parent, &c.Post)
-
-		if err != nil {
-			return comments, err
-		}
-
-		comments = append(comments, &c)
-
+		return nil, err
 	}
 	return comments, nil
 }

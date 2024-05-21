@@ -1,69 +1,70 @@
 
 type User {
-  UserId: UUID!
-  Name: String!
+  id: UUID!
+  name: String!
 }
 
 type Post {
-  PostId: UUID!
-  Title: String!
-  Body: String!
-  UserId: UUID!
-  Comments: [Comment!]
-  DisabledComments: Boolean!
+  id: UUID!
+  title: String!
+  body: String!
+  userId: UUID!
+  comments: [Comment]
+  disabled: Boolean!
 
 }
 
 type Comment {
-  CommentId: UUID!
-  Body: String!
-  UserId: UUID!
-  Parent: UUID!
-  Children: [Comment]
-  Post: UUID !
+  id: UUID!
+  body: String!
+  userId: UUID!
+  parent: UUID!
+  children: [Comment]
+  post: UUID !
 }
 
 input NewPost {
-  Title: String!
-  Body: String!
-  UserId: UUID!
-  DisabledComments: Boolean!
+  title: String!
+  body: String!
+  userId: UUID!
+  disabled: Boolean!
 }
 
 input UpdatePost {
-  PostId: UUID!
-  Title: String!
-  Body: String!
-  UserId: UUID!
-  DisabledComments: Boolean!
+  id: UUID!
+  title: String!
+  body: String!
+  userId: UUID!
+  disabled: Boolean!
 }
 
 input NewComment {
-  Body: String!
-  UserId: UUID!
-  ParentId: UUID
-  PostId: UUID !
+  body: String!
+  userId: UUID!
+  parentId: UUID
+  postId: UUID !
 }
 
 input UpdateComment {
-  Body: String!
+  id: UUID!
+  body: String!
 }
 
 input NewUser {
-  Name: String!
+  name: String!
 }
 
 type Mutation {
   createPost(input: NewPost!): Post!
   updatePost(input: UpdatePost!): Post!
-  deletePost(PostId: UUID!): Boolean!
+  deletePost(id: UUID!): Boolean!
 
   createComment(input: NewComment!): Comment!
   updateComment(input: UpdateComment): Comment !
-  deleteComment(CommentId: UUID!): Boolean!
+  deleteComment(id: UUID!): Boolean!
 
   creatUser(input: NewUser!): User!
-  deleteUser(UserId: UUID!): Boolean!
+  deleteUser(id: UUID!): Boolean!
 }
 
 type Subscription {

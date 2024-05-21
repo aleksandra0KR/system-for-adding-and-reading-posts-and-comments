@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/jmoiron/sqlx"
+	"github.com/go-pg/pg/v10"
 	"system-for-adding-and-reading-posts-and-comments/innternal/repository/implementation"
 )
 
@@ -11,7 +11,7 @@ type Repository struct {
 	CommentRepository
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
+func NewRepository(db *pg.DB) *Repository {
 	return &Repository{
 		UserRepository:    implementation.NewUserPostgresRepository(db),
 		PostRepository:    implementation.NewPostPostgresRepository(db),

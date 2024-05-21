@@ -1,11 +1,12 @@
 package repository
 
 import (
+	"context"
 	"github.com/google/uuid"
-	"system-for-adding-and-reading-posts-and-comments/innternal/model"
+	"system-for-adding-and-reading-posts-and-comments/innternal/models"
 )
 
 type UserRepository interface {
-	CreateUser(user *model.User) error
-	DeleteUserByID(id uuid.UUID) error
+	CreateUser(ctx context.Context, user *models.User) (*models.User, error)
+	DeleteUserByID(ctx context.Context, id uuid.UUID) error
 }

@@ -1,54 +1,54 @@
 package implementation
 
 import (
+	"context"
+	"fmt"
+	"github.com/go-pg/pg/v10"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
-	"system-for-adding-and-reading-posts-and-comments/innternal/model"
+	"system-for-adding-and-reading-posts-and-comments/innternal/models"
 )
 
 type postPostgresRepository struct {
-	db *sqlx.DB
+	db *pg.DB
 }
 
-func NewPostPostgresRepository(db *sqlx.DB) *postPostgresRepository {
+func NewPostPostgresRepository(db *pg.DB) *postPostgresRepository {
 	return &postPostgresRepository{db: db}
 }
 
-func (r *postPostgresRepository) CreatePost(post *model.Post) error {
-	var id uuid.UUID
-	query := `INSERT INTO "posts" ("title", "body", "userId","disabledComments") VALUES ($1, $2, $3, $4) RETURNING postId`
-	row := r.db.QueryRow(query)
-	if err := row.Scan(&id); err != nil {
-		return err
-	}
-	post.PostId = id
+func (r *postPostgresRepository) CreatePost(ctx context.Context, post *models.Post) (*models.Post, error) {
+	_, err := r.db.WithContext(ctx).Model(post).Returning("*").Insert()
 
-	return nil
-}
-
-func (r *postPostgresRepository) DeletePostByID(id uuid.UUID) error {
-
-	query := `DELETE FROM "posts" where "postId"= $1`
-
-	_, err := r.db.Exec(query, id)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	fmt.Print(post)
+	return post, nil
+}
+
+func (r *postPostgresRepository) DeletePostByID(ctx context.Context, id uuid.UUID) error {
+
+	post := &models.Post{Id: id}
+	_, err := r.db.WithContext(ctx).Model(post).Where("id = ?", post.Id).Delete()
+	return err
+}
+
+func (r *postPostgresRepository) GetPostByID(ctx context.Context, id uuid.UUID) (*models.Post, error) {
+	post := &models.Post{Id: id}
+
+	err := r.db.WithContext(ctx).Model(&post).Where("id = ?", id).First()
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	return post, nil
 }
 
-func (r *postPostgresRepository) GetPostByID(id uuid.UUID) (*model.Post, error) {
-	query := `SELECT * FROM "posts" WHERE "postId" = $1`
+func (r *postPostgresRepository) UpdatePost(ctx context.Context, post *models.Post) (*models.Post, error) {
+	_, err := r.db.WithContext(ctx).Model(post).Where("id = ?", post.Id).Update()
+	if err != nil {
+		return nil, err
+	}
+	return post, nil
 
-	var post model.Post
-	err := r.db.Get(&post, query, id)
-
-	return &post, err
-}
-
-func (r *postPostgresRepository) UpdatePost(post *model.Post) error {
-	query := ` UPDATE "posts" SET "title" = $2, "body" = $3, "disabledComments" = $4  WHERE "postId" = $1`
-	_, err := r.db.Exec(query, post.PostId, post.Title, post.Body, post.DisabledComments)
-	return err
 }

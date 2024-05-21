@@ -3,50 +3,46 @@
 package model
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
 type Comment struct {
-	CommentID uuid.UUID  `json:"CommentId"`
-	Body      string     `json:"Body"`
-	UserID    uuid.UUID  `json:"UserId"`
-	CreatedAt time.Time  `json:"CreatedAt"`
-	UpdatedAt *time.Time `json:"UpdatedAt,omitempty"`
-	Parent    *Comment   `json:"Parent,omitempty"`
-	Children  []*Comment `json:"Children,omitempty"`
-	Post      *Post      `json:"Post"`
+	ID       uuid.UUID  `json:"id"`
+	Body     string     `json:"body"`
+	UserID   uuid.UUID  `json:"userId"`
+	Parent   uuid.UUID  `json:"parent"`
+	Children []*Comment `json:"children,omitempty"`
+	Post     uuid.UUID  `json:"post"`
 }
 
 type Mutation struct {
 }
 
 type NewComment struct {
-	Body      string     `json:"Body"`
-	UserID    uuid.UUID  `json:"UserId"`
-	CreatedAt time.Time  `json:"CreatedAt"`
-	ParentID  *uuid.UUID `json:"ParentId,omitempty"`
-	PostID    uuid.UUID  `json:"PostId"`
+	Body     string     `json:"body"`
+	UserID   uuid.UUID  `json:"userId"`
+	ParentID *uuid.UUID `json:"parentId,omitempty"`
+	PostID   uuid.UUID  `json:"postId"`
 }
 
 type NewPost struct {
-	Title            string    `json:"Title"`
-	Body             string    `json:"Body"`
-	UserID           uuid.UUID `json:"UserId"`
-	DisabledComments bool      `json:"DisabledComments"`
-	CreatedAt        time.Time `json:"CreatedAt"`
+	Title    string    `json:"title"`
+	Body     string    `json:"body"`
+	UserID   uuid.UUID `json:"userId"`
+	Disabled bool      `json:"disabled"`
+}
+
+type NewUser struct {
+	Name string `json:"name"`
 }
 
 type Post struct {
-	PostID           uuid.UUID  `json:"PostId"`
-	Title            string     `json:"Title"`
-	Body             string     `json:"Body"`
-	UserID           uuid.UUID  `json:"UserId"`
-	Comments         []*Comment `json:"Comments,omitempty"`
-	DisabledComments bool       `json:"DisabledComments"`
-	CreatedAt        time.Time  `json:"CreatedAt"`
-	UpdatedAt        *time.Time `json:"UpdatedAt,omitempty"`
+	ID       uuid.UUID  `json:"id"`
+	Title    string     `json:"title"`
+	Body     string     `json:"body"`
+	UserID   uuid.UUID  `json:"userId"`
+	Comments []*Comment `json:"comments,omitempty"`
+	Disabled bool       `json:"disabled"`
 }
 
 type Query struct {
@@ -56,21 +52,19 @@ type Subscription struct {
 }
 
 type UpdateComment struct {
-	Body      string    `json:"Body"`
-	UpdatedAt time.Time `json:"UpdatedAt"`
+	ID   uuid.UUID `json:"id"`
+	Body string    `json:"body"`
 }
 
 type UpdatePost struct {
-	PostID           uuid.UUID `json:"PostId"`
-	Title            string    `json:"Title"`
-	Body             string    `json:"Body"`
-	UserID           uuid.UUID `json:"UserId"`
-	DisabledComments bool      `json:"DisabledComments"`
-	UpdatedAt        time.Time `json:"UpdatedAt"`
+	ID       uuid.UUID `json:"id"`
+	Title    string    `json:"title"`
+	Body     string    `json:"body"`
+	UserID   uuid.UUID `json:"userId"`
+	Disabled bool      `json:"disabled"`
 }
 
 type User struct {
-	UserID   uuid.UUID  `json:"UserId"`
-	Posts    []*Post    `json:"Posts,omitempty"`
-	Comments []*Comment `json:"Comments,omitempty"`
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
