@@ -1,6 +1,7 @@
 
 type User {
   UserId: UUID!
+  Name: String!
   Posts: [Post]
   Comments: [Comment]
 }
@@ -12,17 +13,14 @@ type Post {
   UserId: UUID!
   Comments: [Comment]
   DisabledComments: Boolean!
-  CreatedAt: Time !
-  UpdatedAt: Time
+
 }
 
 type Comment {
   CommentId: UUID!
   Body: String!
   UserId: UUID!
-  CreatedAt: Time !
-  UpdatedAt: Time
-  Parent: Comment
+  Parent: UUID!
   Children: [Comment]
   Post: Post !
 }
@@ -32,7 +30,6 @@ input NewPost {
   Body: String!
   UserId: UUID!
   DisabledComments: Boolean!
-  CreatedAt: Time !
 }
 
 input UpdatePost {
@@ -41,30 +38,34 @@ input UpdatePost {
   Body: String!
   UserId: UUID!
   DisabledComments: Boolean!
-  UpdatedAt: Time !
 }
 
 input NewComment {
   Body: String!
   UserId: UUID!
-  CreatedAt: Time !
   ParentId: UUID
   PostId: UUID !
-
 }
 
 input UpdateComment {
   Body: String!
-  UpdatedAt: Time !
+}
+
+input NewUser {
+  Name: String!
 }
 
 type Mutation {
   createPost(input: NewPost!): Post!
   updatePost(input: UpdatePost!): Post!
   deletePost(PostId: UUID!): Boolean!
+
   createComment(input: NewComment!): Comment!
   updateComment(input: UpdateComment): Comment !
   deleteComment(CommentId: UUID!): Boolean!
+
+  creatUser(input: NewUser!): User!
+  deleteUser(UserId: UUID!): Boolean!
 }
 
 type Subscription {
@@ -72,8 +73,8 @@ type Subscription {
 }
 
 type Query {
-  Posts(limit: Int = 10, offset: Int = 0): [Post!]!
-  Post(id: ID!): Post
+  Post(postId: UUID!): Post
+  comments(limit: Int = 10, offset: Int = 0, postId: UUID!): [Comment!]!
 }
 
 scalar UUID
