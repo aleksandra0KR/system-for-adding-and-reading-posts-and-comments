@@ -6,11 +6,10 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"github.com/google/uuid"
+	"sync"
 	"system-for-adding-and-reading-posts-and-comments/graph/model"
 	"system-for-adding-and-reading-posts-and-comments/innternal/models"
-
-	"github.com/google/uuid"
 )
 
 // CreatePost is the resolver for the createPost field.
@@ -21,7 +20,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) 
 		UserId:   input.UserID,
 		Disabled: input.Disabled,
 	}
-	post, err := r.Repository.PostRepository.CreatePost(ctx, post)
+	post, err := r.Repository.CreatePost(post)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +44,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input model.UpdatePos
 		UserId:   input.UserID,
 		Disabled: input.Disabled,
 	}
-	post, err := r.Repository.PostRepository.UpdatePost(ctx, post)
+	post, err := r.Repository.UpdatePost(post)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +60,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input model.UpdatePos
 
 // DeletePost is the resolver for the deletePost field.
 func (r *mutationResolver) DeletePost(ctx context.Context, id uuid.UUID) (bool, error) {
-	err := r.Repository.PostRepository.DeletePostByID(ctx, id)
+	err := r.Repository.DeletePostByID(id)
 	if err != nil {
 		return false, err
 	}
@@ -80,7 +79,7 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewCom
 	} else {
 		comment.Parent = *input.ParentID
 	}
-	comment, err := r.Repository.CommentRepository.CreateComment(ctx, comment)
+	comment, err := r.Repository.CreateComment(comment)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +91,7 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewCom
 		Post:   comment.Post,
 	}
 
+	notify(comment.Post, commentResult)
 	return commentResult, err
 }
 
@@ -101,7 +101,7 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, input *model.Updat
 		Id:   input.ID,
 		Body: input.Body,
 	}
-	comment, err := r.Repository.CommentRepository.UpdateComment(ctx, comment)
+	comment, err := r.Repository.UpdateComment(comment)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, input *model.Updat
 
 // DeleteComment is the resolver for the deleteComment field.
 func (r *mutationResolver) DeleteComment(ctx context.Context, id uuid.UUID) (bool, error) {
-	err := r.Repository.CommentRepository.DeleteCommentByID(ctx, id)
+	err := r.Repository.DeleteCommentByID(id)
 	if err != nil {
 		return false, err
 	}
@@ -129,7 +129,7 @@ func (r *mutationResolver) CreatUser(ctx context.Context, input model.NewUser) (
 	user := &models.User{
 		Name: input.Name,
 	}
-	user, err := r.Repository.UserRepository.CreateUser(ctx, user)
+	user, err := r.Repository.CreateUser(user)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (r *mutationResolver) CreatUser(ctx context.Context, input model.NewUser) (
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) {
-	err := r.Repository.UserRepository.DeleteUserByID(ctx, id)
+	err := r.Repository.DeleteUserByID(id)
 	if err != nil {
 		return false, err
 	}
@@ -152,26 +152,77 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id uuid.UUID) (bool, 
 
 // Post is the resolver for the Post field.
 func (r *queryResolver) Post(ctx context.Context, postID uuid.UUID) (*model.Post, error) {
-	panic(fmt.Errorf("not implemented: Post - Post"))
+	post, err := r.Repository.GetPostByID(postID)
+	if err != nil {
+		return nil, err
+	}
+	comments, err := r.Repository.GetCommentsForPost(postID, 10, 0)
+	if err != nil {
+		return nil, err
+	}
+	resultPost := model.Post{
+		ID:       post.Id,
+		Title:    post.Title,
+		Body:     post.Body,
+		UserID:   post.UserId,
+		Disabled: post.Disabled,
+		Comments: comments,
+	}
+	return &resultPost, err
+
 }
 
 // Comments is the resolver for the comments field.
 func (r *queryResolver) Comments(ctx context.Context, limit *int, offset *int, postID uuid.UUID) ([]*model.Comment, error) {
-	panic(fmt.Errorf("not implemented: Comments - comments"))
+	return r.Repository.GetCommentsForPost(postID, *limit, *offset)
+}
+
+var newCommentsChanel = make(map[uuid.UUID][]chan *model.Comment)
+var mutex sync.Mutex
+
+func notify(postID uuid.UUID, comment *model.Comment) {
+
+	mutex.Lock()
+	defer mutex.Unlock()
+	if channels, found := newCommentsChanel[postID]; found {
+		for _, ch := range channels {
+			ch <- comment
+		}
+	}
+
 }
 
 // NewComment is the resolver for the newComment field.
 func (r *subscriptionResolver) NewComment(ctx context.Context, postID uuid.UUID) (<-chan *model.Comment, error) {
-	panic(fmt.Errorf("not implemented: NewComment - newComment"))
+
+	ch := make(chan *model.Comment, 1)
+	mutex.Lock()
+	newCommentsChanel[postID] = append(newCommentsChanel[postID], ch)
+	mutex.Unlock()
+
+	go func() {
+		<-ctx.Done()
+		mutex.Lock()
+		defer mutex.Unlock()
+		for i, c := range newCommentsChanel[postID] {
+			if c == ch {
+				newCommentsChanel[postID] = append(newCommentsChanel[postID][:i], newCommentsChanel[postID][i+1:]...)
+				break
+			}
+		}
+	}()
+
+	return ch, nil
+
 }
 
-// Mutation returns MutationResolver implementation.
+// Mutation returns MutationResolver inMemory.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Query returns QueryResolver implementation.
+// Query returns QueryResolver inMemory.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-// Subscription returns SubscriptionResolver implementation.
+// Subscription returns SubscriptionResolver inMemory.
 func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
 
 type mutationResolver struct{ *Resolver }

@@ -1,79 +1,78 @@
-
 type User {
-  id: UUID!
-  name: String!
+    id: UUID!
+    name: String!
 }
 
 type Post {
-  id: UUID!
-  title: String!
-  body: String!
-  userId: UUID!
-  comments: [Comment]
-  disabled: Boolean!
+    id: UUID!
+    title: String!
+    body: String!
+    userId: UUID!
+    comments: [Comment]
+    disabled: Boolean!
 
 }
 
 type Comment {
-  id: UUID!
-  body: String!
-  userId: UUID!
-  parent: UUID!
-  children: [Comment]
-  post: UUID !
+    id: UUID!
+    body: String!
+    userId: UUID!
+    parent: UUID
+    children: [Comment]
+    post: UUID !
 }
 
 input NewPost {
-  title: String!
-  body: String!
-  userId: UUID!
-  disabled: Boolean!
+    title: String!
+    body: String!
+    userId: UUID!
+    disabled: Boolean!
 }
 
 input UpdatePost {
-  id: UUID!
-  title: String!
-  body: String!
-  userId: UUID!
-  disabled: Boolean!
+    id: UUID!
+    title: String!
+    body: String!
+    userId: UUID!
+    disabled: Boolean!
 }
 
 input NewComment {
-  body: String!
-  userId: UUID!
-  parentId: UUID
-  postId: UUID !
+    body: String!
+    userId: UUID!
+    parentId: UUID
+    postId: UUID !
 }
 
 input UpdateComment {
-  id: UUID!
-  body: String!
+    id: UUID!
+    body: String!
 }
 
 input NewUser {
-  name: String!
+    name: String!
 }
 
 type Mutation {
-  createPost(input: NewPost!): Post!
-  updatePost(input: UpdatePost!): Post!
-  deletePost(id: UUID!): Boolean!
+    createPost(input: NewPost!): Post!
+    updatePost(input: UpdatePost!): Post!
+    deletePost(id: UUID!): Boolean!
 
-  createComment(input: NewComment!): Comment!
-  updateComment(input: UpdateComment): Comment !
-  deleteComment(id: UUID!): Boolean!
+    createComment(input: NewComment!): Comment!
+    updateComment(input: UpdateComment): Comment !
+    deleteComment(id: UUID!): Boolean!
 
-  creatUser(input: NewUser!): User!
-  deleteUser(id: UUID!): Boolean!
+    creatUser(input: NewUser!): User!
+    deleteUser(id: UUID!): Boolean!
 }
 
 type Subscription {
-  newComment(postId: UUID!): Comment!
+    newComment(postId: UUID!): Comment!
 }
 
-type Query {
-  Post(postId: UUID!): Post
-  comments(limit: Int = 10, offset: Int = 0, postId: UUID!): [Comment!]!
+type Query{
+    Post(postId: UUID!): Post
+    comments(limit: Int = 10, offset: Int = 0, postId: UUID!): [Comment!]!
 }
 
 scalar UUID
