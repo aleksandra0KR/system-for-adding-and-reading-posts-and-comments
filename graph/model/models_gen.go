@@ -10,7 +10,7 @@ type Comment struct {
 	ID       uuid.UUID  `json:"id"`
 	Body     string     `json:"body"`
 	UserID   uuid.UUID  `json:"userId"`
-	Parent   *uuid.UUID `json:"parent,omitempty"`
+	Parent   uuid.UUID  `json:"parent,omitempty"`
 	Children []*Comment `json:"children,omitempty"`
 	Post     uuid.UUID  `json:"post"`
 }
@@ -19,10 +19,10 @@ type Mutation struct {
 }
 
 type NewComment struct {
-	Body     string     `json:"body"`
-	UserID   uuid.UUID  `json:"userId"`
-	ParentID *uuid.UUID `json:"parentId,omitempty"`
-	PostID   uuid.UUID  `json:"postId"`
+	Body     string    `json:"body"`
+	UserID   uuid.UUID `json:"userId"`
+	ParentID uuid.UUID `json:"parentId,omitempty"`
+	PostID   uuid.UUID `json:"postId"`
 }
 
 type NewPost struct {

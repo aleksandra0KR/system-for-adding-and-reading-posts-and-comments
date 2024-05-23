@@ -4141,7 +4141,7 @@ func (ec *executionContext) unmarshalInputNewComment(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
-			it.ParentID = data
+			it.ParentID = *data
 		case "postId":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("postId"))
 			data, err := ec.unmarshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)

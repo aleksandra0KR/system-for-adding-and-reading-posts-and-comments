@@ -75,10 +75,10 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewCom
 		UserId: input.UserID,
 		Post:   input.PostID,
 	}
-	if input.ParentID == nil {
+	if input.ParentID == uuid.Nil {
 		comment.Parent = uuid.Nil
 	} else {
-		comment.Parent = *input.ParentID
+		comment.Parent = input.ParentID
 	}
 	comment, err := r.Repository.CreateComment(comment)
 	if err != nil {
@@ -88,7 +88,7 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewCom
 		ID:     comment.Id,
 		Body:   comment.Body,
 		UserID: comment.UserId,
-		Parent: &comment.Parent,
+		Parent: comment.Parent,
 		Post:   comment.Post,
 	}
 
@@ -110,7 +110,7 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, input *model.Updat
 		ID:     comment.Id,
 		Body:   comment.Body,
 		UserID: comment.UserId,
-		Parent: &comment.Parent,
+		Parent: comment.Parent,
 		Post:   comment.Post,
 	}
 	return result, err

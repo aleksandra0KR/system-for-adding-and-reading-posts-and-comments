@@ -98,8 +98,8 @@ func (r *Repository) GetCommentsForPost(id uuid.UUID, limit, offset int) ([]*mod
 	}
 
 	for _, comment := range commentMap {
-		if *comment.Parent != uuid.Nil {
-			parentComment, ok := commentMap[*comment.Parent]
+		if comment.Parent != uuid.Nil {
+			parentComment, ok := commentMap[comment.Parent]
 			if ok {
 				parentComment.Children = append(parentComment.Children, comment)
 			}

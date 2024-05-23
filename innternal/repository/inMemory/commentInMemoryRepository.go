@@ -18,7 +18,7 @@ func (bd *InMemoryRepository) GetCommentsForPost(postId uuid.UUID, limit int, of
 				Body:   comment.Body,
 				UserID: comment.UserId,
 				Post:   comment.Post,
-				Parent: &comment.Parent,
+				Parent: comment.Parent,
 			})
 		}
 	}
