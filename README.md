@@ -46,15 +46,15 @@ STORAGE=postgres
 
 
 # Пример работы
-- создание поста с запрещенными комментариями 
 
+- создание поста с запрещенными комментариями
 ![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/blob/master/exampleImg/img1.png?raw=true)
 
 
 - попытка прокомментировать пост -> выводит сообщение о запрете
-  ![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/blob/master/exampleImg/img2.png?raw=true)
+![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/blob/master/exampleImg/img2.png?raw=true)
 
 
 - вывести комментарии под постом
-  ![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/blob/master/exampleImg/img4.png?raw=true)
+![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/blob/master/exampleImg/img4.png?raw=true)
 
