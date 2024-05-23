@@ -44,10 +44,17 @@ docker compose up
 STORAGE=postgres
 ```
 
-![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/exampleImg/img1.png)
 
-![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/exampleImg/img2.png)
+# Пример работы
+- создание поста с запрещенными комментариями 
 
-![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/exampleImg/img3.png)
+![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/blob/master/exampleImg/img1.png?raw=true)
 
-![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/exampleImg/img4.png)
+
+- попытка прокомментировать пост -> выводит сообщение о запрете
+  ![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/blob/master/exampleImg/img2.png?raw=true)
+
+
+- вывести комментарии под постом
+  ![](https://github.com/aleksandra0KR/system-for-adding-and-reading-posts-and-comments/blob/master/exampleImg/img4.png?raw=true)
+
