@@ -10,7 +10,7 @@ type Comment struct {
 	ID       uuid.UUID  `json:"id"`
 	Body     string     `json:"body"`
 	UserID   uuid.UUID  `json:"userId"`
-	Parent   uuid.UUID  `json:"parent"`
+	Parent   *uuid.UUID `json:"parent,omitempty"`
 	Children []*Comment `json:"children,omitempty"`
 	Post     uuid.UUID  `json:"post"`
 }

@@ -6,10 +6,11 @@ package graph
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"sync"
 	"system-for-adding-and-reading-posts-and-comments/graph/model"
 	"system-for-adding-and-reading-posts-and-comments/innternal/models"
+
+	"github.com/google/uuid"
 )
 
 // CreatePost is the resolver for the createPost field.
@@ -87,7 +88,7 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewCom
 		ID:     comment.Id,
 		Body:   comment.Body,
 		UserID: comment.UserId,
-		Parent: comment.Parent,
+		Parent: &comment.Parent,
 		Post:   comment.Post,
 	}
 
@@ -109,7 +110,7 @@ func (r *mutationResolver) UpdateComment(ctx context.Context, input *model.Updat
 		ID:     comment.Id,
 		Body:   comment.Body,
 		UserID: comment.UserId,
-		Parent: comment.Parent,
+		Parent: &comment.Parent,
 		Post:   comment.Post,
 	}
 	return result, err
@@ -228,3 +229,8 @@ func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionRes
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
+
+// Posts is the resolver for the posts field.
+func (r *queryResolver) Posts(ctx context.Context, limit *int, offset *int) ([]*model.Post, error) {
+	return r.Repository.GetPosts(*limit, *offset)
+}

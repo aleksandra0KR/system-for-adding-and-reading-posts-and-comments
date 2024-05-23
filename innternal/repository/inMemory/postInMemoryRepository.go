@@ -3,6 +3,7 @@ package inMemory
 import (
 	"errors"
 	"github.com/google/uuid"
+	"system-for-adding-and-reading-posts-and-comments/graph/model"
 	"system-for-adding-and-reading-posts-and-comments/innternal/models"
 )
 
@@ -62,4 +63,29 @@ func (bd *InMemoryRepository) GetPostByID(postId uuid.UUID) (*models.Post, error
 	}
 
 	return post, nil
+}
+
+func (bd *InMemoryRepository) GetPosts(limit int, offset int) ([]*model.Post, error) {
+	bd.mutex.RLock()
+	defer bd.mutex.RUnlock()
+
+	var posts []*model.Post
+	for _, post := range bd.PostRepository {
+
+		posts = append(posts, &model.Post{
+			Title:  post.Title,
+			Body:   post.Body,
+			UserID: post.UserId,
+		})
+
+	}
+
+	if offset > len(posts) {
+		return []*model.Post{}, errors.New("offset out of range")
+	}
+	limit = limit + offset
+	if limit > len(posts) {
+		limit = len(posts)
+	}
+	return posts[offset:limit], nil
 }

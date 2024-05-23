@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"github.com/google/uuid"
+	"system-for-adding-and-reading-posts-and-comments/graph/model"
 	"system-for-adding-and-reading-posts-and-comments/innternal/models"
 )
 
@@ -76,4 +77,49 @@ func (r *Repository) UpdatePost(post *models.Post) (*models.Post, error) {
 	}
 
 	return post, err
+}
+
+func (r *Repository) GetPosts(limit, offset int) ([]*model.Post, error) {
+
+	rows, err := r.db.Query(`SELECT "id", "title", "body", "user_id" FROM "posts"`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	postMap := make(map[uuid.UUID]*model.Post)
+
+	for rows.Next() {
+		var p model.Post
+		if err := rows.Scan(&p.ID, &p.Title, &p.Body, &p.UserID); err != nil {
+			return nil, err
+		}
+		postMap[p.ID] = &p
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	var posts []*model.Post
+	if limit == 0 {
+		return posts, nil
+	}
+
+	start := offset
+	end := limit + offset
+
+	if end > len(postMap) {
+		end = len(postMap)
+	}
+
+	for _, post := range postMap {
+		if len(posts) >= end {
+			return posts, nil
+		}
+		posts = append(posts, post)
+
+	}
+
+	return posts[start:end], nil
 }
